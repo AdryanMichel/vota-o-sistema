@@ -7,26 +7,35 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .btn { padding: 10px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f4f4f9; }
+        h2 { color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .btn { padding: 10px 20px; margin: 10px 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .btn:hover { background-color: #0056b3; }
+        select { padding: 10px; font-size: 16px; margin-bottom: 20px; border-radius: 5px; width: 200px; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 8px 0; font-size: 16px; border-bottom: 1px solid #ccc; }
     </style>
 </head>
 <body>
 
-    <h2>Votação para Equipe Gremista 2025</h2>
-    <p>Escolha um grupo e vote:</p>
+    <div class="container">
+        <h2>Votação para Equipe Gremista 2025</h2>
+        <p>Escolha um grupo e vote:</p>
 
-    <select id="grupo">
-        <option value="">-- Selecione --</option>
-        <option value="Transforma JB Leme">Transforma JB Leme</option>
-        <option value="Renova Batista">Renova Batista</option>
-        <option value="União Jovens">União Jovens</option>
-        <option value="Nova Era">Nova Era</option>
-    </select>
-    <button class="btn" onclick="registrarVoto()">Votar</button>
+        <select id="grupo">
+            <option value="">-- Selecione --</option>
+            <option value="Transforma JB Leme">Transforma JB Leme</option>
+            <option value="Renova Batista">Renova Batista</option>
+            <option value="União Jovens">União Jovens</option>
+            <option value="Nova Era">Nova Era</option>
+        </select>
+        <button class="btn" onclick="registrarVoto()">Votar</button>
 
-    <h3>Resultados da Votação</h3>
-    <ul id="resultados"></ul>
+        <h3>Resultados da Votação</h3>
+        <button class="btn" onclick="visualizarResultados()">Atualizar Resultados</button>
+        <ul id="resultados"></ul>
+    </div>
 
     <script>
         // 🔥 Configuração do Firebase
@@ -49,15 +58,16 @@
             database.ref("votos").push({ grupo })
                 .then(() => {
                     alert("Voto registrado com sucesso!");
+                    visualizarResultados(); // Atualiza os resultados imediatamente após o voto
                 })
                 .catch(error => {
                     alert("Erro ao registrar voto: " + error.message);
                 });
         }
 
-        // Função para visualizar os resultados dos votos em tempo real
+        // Função para visualizar os resultados dos votos
         function visualizarResultados() {
-            database.ref("votos").on("value", snapshot => {
+            database.ref("votos").once("value", snapshot => {
                 const votos = snapshot.val();
                 const contagem = {};
 
@@ -78,8 +88,10 @@
             });
         }
 
-        // Inicia a visualização dos resultados ao carregar a página
-        visualizarResultados();
+        // Inicializa a visualização dos resultados ao carregar a página
+        window.onload = function() {
+            visualizarResultados();
+        };
 
     </script>
 
