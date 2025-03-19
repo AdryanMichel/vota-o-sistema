@@ -4,9 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Votação</title>
-    <!-- Alterando para a versão padrão que pode ser carregada diretamente no navegador -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <!-- Use a versão modular do Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getDatabase, ref, push, get, child } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+        // 🔥 Configuração do Firebase
+        const firebaseConfig = {
+            databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Função para registrar voto no Firebase
+        function registrarVoto() {
+            const grupo = document.getElementById("grupo").value;
+            if (!grupo) {
+                alert("Escolha um grupo para votar!");
+                return;
+            }
+
+            // Salva o voto no banco de dados Firebase
+            const votosRef = ref(database, 'votos');
+            push(votosRef, { grupo })
+                .then(() => {
+                    alert("Voto registrado com sucesso!");
+                    visualizarResultados(); // Atualiza os resultados imediatamente após o voto
+                })
+                .catch(error => {
+                    alert("Erro ao registrar voto: " + error.message);
+                });
+        }
+
+        // Função para visualizar os resultados dos votos
+        function visualizarResultados() {
+            const votosRef = ref(database, 'votos');
+            get(votosRef).then(snapshot => {
+                const votos = snapshot.val();
+                const contagem = {};
+
+                if (votos) {
+                    // Contagem de votos
+                    Object.values(votos).forEach(voto => {
+                        contagem[voto.grupo] = (contagem[voto.grupo] || 0) + 1;
+                    });
+                }
+
+                const lista = document.getElementById("resultados");
+                lista.innerHTML = "";
+                for (const [grupo, total] of Object.entries(contagem)) {
+                    const item = document.createElement("li");
+                    item.textContent = `${grupo}: ${total} votos`;
+                    lista.appendChild(item);
+                }
+            }).catch(error => {
+                console.error("Erro ao carregar resultados: " + error.message);
+            });
+        }
+
+        // Inicializa a visualização dos resultados ao carregar a página
+        window.onload = function() {
+            visualizarResultados();
+        };
+    </script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f4f4f9; }
         h2 { color: #333; }
@@ -37,64 +99,6 @@
         <button class="btn" onclick="visualizarResultados()">Atualizar Resultados</button>
         <ul id="resultados"></ul>
     </div>
-
-    <script>
-        // 🔥 Configuração do Firebase
-        const firebaseConfig = {
-            databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
-        };
-        // Inicializa o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Função para registrar voto no Firebase
-        function registrarVoto() {
-            const grupo = document.getElementById("grupo").value;
-            if (!grupo) {
-                alert("Escolha um grupo para votar!");
-                return;
-            }
-
-            // Salva o voto no banco de dados Firebase
-            database.ref("votos").push({ grupo })
-                .then(() => {
-                    alert("Voto registrado com sucesso!");
-                    visualizarResultados(); // Atualiza os resultados imediatamente após o voto
-                })
-                .catch(error => {
-                    alert("Erro ao registrar voto: " + error.message);
-                });
-        }
-
-        // Função para visualizar os resultados dos votos
-        function visualizarResultados() {
-            database.ref("votos").once("value", snapshot => {
-                const votos = snapshot.val();
-                const contagem = {};
-
-                if (votos) {
-                    // Contagem de votos
-                    Object.values(votos).forEach(voto => {
-                        contagem[voto.grupo] = (contagem[voto.grupo] || 0) + 1;
-                    });
-                }
-
-                const lista = document.getElementById("resultados");
-                lista.innerHTML = "";
-                for (const [grupo, total] of Object.entries(contagem)) {
-                    const item = document.createElement("li");
-                    item.textContent = `${grupo}: ${total} votos`;
-                    lista.appendChild(item);
-                }
-            });
-        }
-
-        // Inicializa a visualização dos resultados ao carregar a página
-        window.onload = function() {
-            visualizarResultados();
-        };
-
-    </script>
 
 </body>
 </html>
