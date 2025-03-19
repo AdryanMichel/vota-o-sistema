@@ -26,6 +26,7 @@
     <button class="btn" onclick="registrarVoto()">Votar</button>
 
     <h3>Resultados da Votação</h3>
+    <button class="btn" onclick="visualizarResultados()">Atualizar Resultados</button>
     <ul id="resultados"></ul>
 
     <script>
@@ -49,6 +50,7 @@
             database.ref("votos").push({ grupo })
                 .then(() => {
                     alert("Voto registrado com sucesso!");
+                    visualizarResultados(); // Atualiza os resultados após o voto
                 })
                 .catch(error => {
                     alert("Erro ao registrar voto: " + error.message);
@@ -79,7 +81,7 @@
         }
 
         // Inicia a visualização dos resultados ao carregar a página
-        visualizarResultados();
+        window.onload = visualizarResultados;
     </script>
 
 </body>
