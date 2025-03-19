@@ -1,16 +1,16 @@
-<!-- Carregue o Firebase SDK com módulos -->
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
-    import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js';
+<!-- Carregue o Firebase SDK diretamente -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 
+<script>
     // Configuração do Firebase
     const firebaseConfig = {
         databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
     };
 
     // Inicializa o Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
     // Função para registrar voto no Firebase
     function registrarVoto() {
@@ -21,7 +21,7 @@
         }
 
         // Salva o voto no banco de dados Firebase
-        push(ref(database, 'votos'), {
+        database.ref('votos').push({
             grupo: grupo
         }).then(() => {
             alert("Voto registrado com sucesso!");
@@ -32,8 +32,8 @@
 
     // Função para visualizar os resultados dos votos em tempo real
     function visualizarResultados() {
-        const resultadosRef = ref(database, 'votos');
-        onValue(resultadosRef, (snapshot) => {
+        const resultadosRef = database.ref('votos');
+        resultadosRef.on('value', (snapshot) => {
             const votos = snapshot.val();
             const contagem = {};
 
