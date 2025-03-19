@@ -26,7 +26,6 @@
     <button class="btn" onclick="registrarVoto()">Votar</button>
 
     <h3>Resultados da Votação</h3>
-    <button class="btn" onclick="visualizarResultados()">Atualizar Resultados</button>
     <ul id="resultados"></ul>
 
     <script>
@@ -58,7 +57,7 @@
 
         // Função para visualizar os resultados dos votos em tempo real
         function visualizarResultados() {
-            database.ref("votos").once("value", snapshot => {
+            database.ref("votos").on("value", snapshot => {
                 const votos = snapshot.val();
                 const contagem = {};
 
@@ -78,6 +77,10 @@
                 }
             });
         }
+
+        // Inicia a visualização dos resultados ao carregar a página
+        visualizarResultados();
+
     </script>
 
 </body>
