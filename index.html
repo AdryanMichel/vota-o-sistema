@@ -1,90 +1,58 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Votação</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .btn { padding: 10px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
-    </style>
-</head>
-<body>
+<!-- Carregue o Firebase SDK com módulos -->
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
+    import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js';
 
-    <h2>Votação para Equipe Gremista 2025</h2>
-    <p>Escolha um grupo e vote:</p>
+    // Configuração do Firebase
+    const firebaseConfig = {
+        databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
+    };
 
-    <select id="grupo">
-        <option value="">-- Selecione --</option>
-        <option value="Transforma JB Leme">Transforma JB Leme</option>
-        <option value="Renova Batista">Renova Batista</option>
-        <option value="União Jovens">União Jovens</option>
-        <option value="Nova Era">Nova Era</option>
-    </select>
-    <button class="btn" onclick="registrarVoto()">Votar</button>
+    // Inicializa o Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-    <h3>Resultados da Votação</h3>
-    <ul id="resultados"></ul>
+    // Função para registrar voto no Firebase
+    function registrarVoto() {
+        const grupo = document.getElementById("grupo").value;
+        if (!grupo) {
+            alert("Escolha um grupo para votar!");
+            return;
+        }
 
-    <!-- Carregar Firebase antes do script de votação -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+        // Salva o voto no banco de dados Firebase
+        push(ref(database, 'votos'), {
+            grupo: grupo
+        }).then(() => {
+            alert("Voto registrado com sucesso!");
+        }).catch(error => {
+            alert("Erro ao registrar voto: " + error.message);
+        });
+    }
 
-    <script>
-        // 🔥 Configuração do Firebase
-        const firebaseConfig = {
-            databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
-        };
+    // Função para visualizar os resultados dos votos em tempo real
+    function visualizarResultados() {
+        const resultadosRef = ref(database, 'votos');
+        onValue(resultadosRef, (snapshot) => {
+            const votos = snapshot.val();
+            const contagem = {};
 
-        // Inicializa o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Função para registrar voto no Firebase
-        function registrarVoto() {
-            const grupo = document.getElementById("grupo").value;
-            if (!grupo) {
-                alert("Escolha um grupo para votar!");
-                return;
+            if (votos) {
+                Object.values(votos).forEach(voto => {
+                    contagem[voto.grupo] = (contagem[voto.grupo] || 0) + 1;
+                });
             }
 
-            // Salva o voto no banco de dados Firebase
-            database.ref("votos").push({ grupo })
-                .then(() => {
-                    alert("Voto registrado com sucesso!");
-                    visualizarResultados(); // Atualiza os resultados após registrar o voto
-                })
-                .catch(error => {
-                    alert("Erro ao registrar voto: " + error.message);
-                });
-        }
+            const lista = document.getElementById("resultados");
+            lista.innerHTML = "";
+            for (const [grupo, total] of Object.entries(contagem)) {
+                const item = document.createElement("li");
+                item.textContent = `${grupo}: ${total} votos`;
+                lista.appendChild(item);
+            }
+        });
+    }
 
-        // Função para visualizar os resultados dos votos em tempo real
-        function visualizarResultados() {
-            database.ref("votos").on("value", snapshot => {
-                const votos = snapshot.val();
-                const contagem = {};
-
-                if (votos) {
-                    // Contagem de votos
-                    Object.values(votos).forEach(voto => {
-                        contagem[voto.grupo] = (contagem[voto.grupo] || 0) + 1;
-                    });
-                }
-
-                const lista = document.getElementById("resultados");
-                lista.innerHTML = "";
-                for (const [grupo, total] of Object.entries(contagem)) {
-                    const item = document.createElement("li");
-                    item.textContent = `${grupo}: ${total} votos`;
-                    lista.appendChild(item);
-                }
-            });
-        }
-
-        // Inicia a visualização dos resultados ao carregar a página
-        visualizarResultados();
-    </script>
-
-</body>
-</html>
+    // Inicia a visualização dos resultados ao carregar a página
+    visualizarResultados();
+</script>
