@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Votação</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .btn { padding: 10px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
@@ -26,14 +24,18 @@
     <button class="btn" onclick="registrarVoto()">Votar</button>
 
     <h3>Resultados da Votação</h3>
-    <button class="btn" onclick="visualizarResultados()">Atualizar Resultados</button>
     <ul id="resultados"></ul>
+
+    <!-- Carregar Firebase antes do script de votação -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 
     <script>
         // 🔥 Configuração do Firebase
         const firebaseConfig = {
             databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
         };
+
         // Inicializa o Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -50,7 +52,7 @@
             database.ref("votos").push({ grupo })
                 .then(() => {
                     alert("Voto registrado com sucesso!");
-                    visualizarResultados(); // Atualiza os resultados após o voto
+                    visualizarResultados(); // Atualiza os resultados após registrar o voto
                 })
                 .catch(error => {
                     alert("Erro ao registrar voto: " + error.message);
@@ -81,7 +83,7 @@
         }
 
         // Inicia a visualização dos resultados ao carregar a página
-        window.onload = visualizarResultados;
+        visualizarResultados();
     </script>
 
 </body>
