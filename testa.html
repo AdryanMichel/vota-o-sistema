@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Votação</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .btn { padding: 10px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>Votação para Equipe Gremista 2025</h2>
+    <p>Escolha um grupo e vote:</p>
+
+    <select id="grupo">
+        <option value="">-- Selecione --</option>
+        <option value="Transforma JB Leme">Transforma JB Leme</option>
+        <option value="Renova Batista">Renova Batista</option>
+        <option value="União Jovens">União Jovens</option>
+        <option value="Nova Era">Nova Era</option>
+    </select>
+    <button class="btn" onclick="registrarVoto()">Votar</button>
+
+    <h3>Resultados da Votação</h3>
+    <button class="btn" onclick="visualizarResultados()">Atualizar Resultados</button>
+    <ul id="resultados"></ul>
+
+    <script>
+        // Função para registrar voto no localStorage
+        function registrarVoto() {
+            const grupo = document.getElementById("grupo").value;
+            if (!grupo) {
+                alert("Escolha um grupo para votar!");
+                return;
+            }
+
+            let votos = JSON.parse(localStorage.getItem("votos")) || [];
+            votos.push({ grupo });
+            localStorage.setItem("votos", JSON.stringify(votos));
+
+            alert("Voto registrado com sucesso!");
+        }
+
+        // Função para visualizar os resultados dos votos
+        function visualizarResultados() {
+            let votos = JSON.parse(localStorage.getItem("votos")) || [];
+            const contagem = {};
+
+            votos.forEach(voto => {
+                contagem[voto.grupo] = (contagem[voto.grupo] || 0) + 1;
+            });
+
+            const lista = document.getElementById("resultados");
+            lista.innerHTML = "";
+            for (const [grupo, total] of Object.entries(contagem)) {
+                const item = document.createElement("li");
+                item.textContent = `${grupo}: ${total} votos`;
+                lista.appendChild(item);
+            }
+        }
+    </script>
+
+</body>
+</html>
