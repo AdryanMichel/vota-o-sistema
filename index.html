@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Votação</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .btn { padding: 10px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
@@ -28,7 +30,15 @@
     <ul id="resultados"></ul>
 
     <script>
-        // Função para registrar voto no localStorage
+        // 🔥 Configuração do Firebase
+        const firebaseConfig = {
+            databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
+        };
+        // Inicializa o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Função para registrar voto no Firebase
         function registrarVoto() {
             const grupo = document.getElementById("grupo").value;
             if (!grupo) {
@@ -36,29 +46,37 @@
                 return;
             }
 
-            let votos = JSON.parse(localStorage.getItem("votos")) || [];
-            votos.push({ grupo });
-            localStorage.setItem("votos", JSON.stringify(votos));
-
-            alert("Voto registrado com sucesso!");
+            // Salva o voto no banco de dados Firebase
+            database.ref("votos").push({ grupo })
+                .then(() => {
+                    alert("Voto registrado com sucesso!");
+                })
+                .catch(error => {
+                    alert("Erro ao registrar voto: " + error.message);
+                });
         }
 
-        // Função para visualizar os resultados dos votos
+        // Função para visualizar os resultados dos votos em tempo real
         function visualizarResultados() {
-            let votos = JSON.parse(localStorage.getItem("votos")) || [];
-            const contagem = {};
+            database.ref("votos").once("value", snapshot => {
+                const votos = snapshot.val();
+                const contagem = {};
 
-            votos.forEach(voto => {
-                contagem[voto.grupo] = (contagem[voto.grupo] || 0) + 1;
+                if (votos) {
+                    // Contagem de votos
+                    Object.values(votos).forEach(voto => {
+                        contagem[voto.grupo] = (contagem[voto.grupo] || 0) + 1;
+                    });
+                }
+
+                const lista = document.getElementById("resultados");
+                lista.innerHTML = "";
+                for (const [grupo, total] of Object.entries(contagem)) {
+                    const item = document.createElement("li");
+                    item.textContent = `${grupo}: ${total} votos`;
+                    lista.appendChild(item);
+                }
             });
-
-            const lista = document.getElementById("resultados");
-            lista.innerHTML = "";
-            for (const [grupo, total] of Object.entries(contagem)) {
-                const item = document.createElement("li");
-                item.textContent = `${grupo}: ${total} votos`;
-                lista.appendChild(item);
-            }
         }
     </script>
 
