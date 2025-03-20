@@ -94,6 +94,8 @@
         <button id="botaoResultados" onclick="pedirSenha()">Ver Resultados</button>
     </div>
 
+    <audio id="votoSom" src="https://www.myinstants.com/media/sounds/tiny-button-push.mp3"></audio>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
@@ -130,6 +132,7 @@
 
             database.ref('votos').push({ grupo: grupo })
                 .then(() => {
+                    document.getElementById("votoSom").play();
                     alert("Voto registrado com sucesso!");
                     document.getElementById("grupo").value = "";
                 })
