@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Votação - Chapa 2025</title>
     <style>
-        /* Estilos Gerais test */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -28,7 +27,6 @@
             color: #333;
         }
 
-        /* Estilização do Select */
         select {
             width: 100%;
             padding: 10px;
@@ -37,7 +35,6 @@
             border: 1px solid #ccc;
         }
 
-        /* Estilização dos Botões */
         button {
             background: #28a745;
             color: white;
@@ -50,11 +47,11 @@
             transition: 0.3s;
         }
 
-        button:hover {
-            background: #218838;
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
-        /* Resultados */
         #resultados {
             list-style: none;
             padding: 0;
@@ -67,6 +64,12 @@
             margin: 5px 0;
             border-radius: 5px;
             font-size: 16px;
+        }
+
+        #contador {
+            font-size: 14px;
+            color: red;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -83,28 +86,25 @@
             <option value="União Jovem">União Jovem</option>
             <option value="Nova Era">Nova Era</option>
         </select>
-        <button onclick="registrarVoto()">Votar</button>
+        <button id="botaoVotar" onclick="registrarVoto()">Votar</button>
+        <p id="contador"></p>
 
         <h2>Resultados</h2>
         <ul id="resultados"></ul>
         <button onclick="visualizarResultados()">Atualizar Resultados</button>
     </div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
     <script>
-        // Configuração do Firebase
         const firebaseConfig = {
             databaseURL: "https://chapa2025-default-rtdb.firebaseio.com/"
         };
 
-        // Inicializa o Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Função para registrar voto no Firebase
         function registrarVoto() {
             const grupo = document.getElementById("grupo").value;
             if (!grupo) {
@@ -112,18 +112,32 @@
                 return;
             }
 
-            // Salva o voto no banco de dados Firebase
-            database.ref('votos').push({
-                grupo: grupo
-            }).then(() => {
-                alert("Voto registrado com sucesso!");
-                visualizarResultados(); // Atualiza os resultados imediatamente
-            }).catch(error => {
-                alert("Erro ao registrar voto: " + error.message);
-            });
+            const botao = document.getElementById("botaoVotar");
+            const contador = document.getElementById("contador");
+            botao.disabled = true;
+            let tempo = 10;
+            contador.innerText = `Espere ${tempo} segundos para votar novamente.`;
+
+            const intervalo = setInterval(() => {
+                tempo--;
+                contador.innerText = `Espere ${tempo} segundos para votar novamente.`;
+                if (tempo <= 0) {
+                    clearInterval(intervalo);
+                    botao.disabled = false;
+                    contador.innerText = "";
+                }
+            }, 1000);
+
+            database.ref('votos').push({ grupo: grupo })
+                .then(() => {
+                    alert("Voto registrado com sucesso!");
+                    visualizarResultados();
+                })
+                .catch(error => {
+                    alert("Erro ao registrar voto: " + error.message);
+                });
         }
 
-        // Função para visualizar os resultados dos votos em tempo real
         function visualizarResultados() {
             const resultadosRef = database.ref('votos');
             resultadosRef.once('value', (snapshot) => {
@@ -146,9 +160,7 @@
             });
         }
 
-        // Inicia a visualização dos resultados ao carregar a página
         visualizarResultados();
     </script>
-
 </body>
 </html>
