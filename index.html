@@ -91,7 +91,7 @@
 
         <h2>Resultados</h2>
         <ul id="resultados"></ul>
-        <button onclick="visualizarResultados()">Atualizar Resultados</button>
+        <button id="botaoResultados" onclick="pedirSenha()">Ver Resultados</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -131,11 +131,19 @@
             database.ref('votos').push({ grupo: grupo })
                 .then(() => {
                     alert("Voto registrado com sucesso!");
-                    visualizarResultados();
                 })
                 .catch(error => {
                     alert("Erro ao registrar voto: " + error.message);
                 });
+        }
+
+        function pedirSenha() {
+            const senha = prompt("Digite a senha para visualizar os resultados:");
+            if (senha === "1234") {
+                visualizarResultados();
+            } else {
+                alert("Senha incorreta!");
+            }
         }
 
         function visualizarResultados() {
@@ -159,8 +167,6 @@
                 }
             });
         }
-
-        visualizarResultados();
     </script>
 </body>
 </html>
