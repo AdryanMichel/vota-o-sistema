@@ -115,7 +115,7 @@
             const botao = document.getElementById("botaoVotar");
             const contador = document.getElementById("contador");
             botao.disabled = true;
-            let tempo = 10;
+            let tempo = 5;
             contador.innerText = `Espere ${tempo} segundos para votar novamente.`;
 
             const intervalo = setInterval(() => {
@@ -131,6 +131,7 @@
             database.ref('votos').push({ grupo: grupo })
                 .then(() => {
                     alert("Voto registrado com sucesso!");
+                    document.getElementById("grupo").value = "";
                 })
                 .catch(error => {
                     alert("Erro ao registrar voto: " + error.message);
